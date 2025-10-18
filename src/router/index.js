@@ -2,6 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import publicRoutes from './public'
 import privateRoutes from './private'
+import {useUserStore} from "@/stores/userStore.js";
 
 const routes = [
   ...publicRoutes,
@@ -15,12 +16,18 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = true
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: 'Login' })
-  } else {
-    next()
+  const userStore = useUserStore()
+  if (!userStore.user) userStore.hydrate()
+
+  if (to.meta.requiresAuth && !userStore.user) {
+    return next({ name: 'Login' })
   }
+
+  if (!to.meta.requiresAuth && userStore.user) {
+    return next({ name: 'Dashboard' })
+  }
+
+  next()
 })
 
 export default router
