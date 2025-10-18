@@ -3,7 +3,7 @@
     <!-- Header -->
     <header class="bg-white bg-opacity-90 backdrop-blur-md rounded-xl p-4 mb-4 shadow-md flex justify-between items-center">
       <h1 class="text-xl font-bold">Админка</h1>
-      <span class="hidden md:block">Привет, Админ!</span>
+      <span class="hidden md:block">  Привет, {{ user?.name || 'Админ' }}!</span>
     </header>
 
     <!-- Body -->
@@ -30,5 +30,36 @@ import Sidebar from '@/components/Sidebar.vue'
 export default {
   name: 'AppLayout',
   components: { Sidebar },
+
+  computed: {
+    user() {
+      return this.$users.user
+    },
+  },
+
+  methods: {
+    async getMe() {
+      try {
+        await this.$users.getMe()
+        console.log('Пользователь обновлён:', this.user)
+        if (this.user?.role === 'admin') {
+          console.log('✅ Это админ!')
+        }
+      } catch (e) {
+        console.warn('Ошибка при загрузке пользователя:', e)
+      }
+    },
+
+    updateUserName(newName) {
+      const updated = { ...this.user, name: newName }
+      this.$users.setUser(updated)
+    },
+  },
+
+  mounted() {
+    this.$users.hydrate()
+    this.getMe()
+  },
 }
 </script>
+
