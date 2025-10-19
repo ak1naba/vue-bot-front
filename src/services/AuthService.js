@@ -4,4 +4,8 @@ export const AuthService = {
     login(credentials) {
         return publicApiRequest.post('/login', credentials)
     },
+
+    logout() {
+        return privateApiRequest.post('/logout')
+    }
 }

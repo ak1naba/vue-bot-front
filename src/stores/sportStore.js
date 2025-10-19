@@ -57,7 +57,6 @@ export const useSportStore = defineStore('sport', {
             return new Promise((resolve, reject) => {
                 SportService.delete(id)
                     .then(res => {
-                        this.sports = this.sports.filter(s => s.id !== id)
                         resolve(res)
                     })
                     .catch(err => reject(err))

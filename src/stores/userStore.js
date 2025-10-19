@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { UserService } from '@/services/UserService.js'
 
-const STORAGE_KEY = 'user_v1' // версия ключа, чтобы можно было мигрировать
+const STORAGE_KEY = 'user' // версия ключа, чтобы можно было мигрировать
 
 function safeParse(json) {
     try {

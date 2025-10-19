@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import publicRoutes from './public'
 import privateRoutes from './private'
 import {useUserStore} from "@/stores/userStore.js";
+import {useAuthStore} from "@/stores/authStore.js";
 
 const routes = [
   ...publicRoutes,
@@ -16,14 +17,14 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const userStore = useUserStore()
-  if (!userStore.user) userStore.hydrate()
+  const authStore = useAuthStore()
+  if (!authStore.token) authStore.hydrate()
 
-  if (to.meta.requiresAuth && !userStore.user) {
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return next({ name: 'Login' })
   }
 
-  if (!to.meta.requiresAuth && userStore.user) {
+  if (!to.meta.requiresAuth && authStore.isAuthenticated) {
     return next({ name: 'Dashboard' })
   }
 

@@ -3,7 +3,18 @@
     <!-- Header -->
     <header class="bg-white bg-opacity-90 backdrop-blur-md rounded-xl p-4 mb-4 shadow-md flex justify-between items-center">
       <h1 class="text-xl font-bold">Админка</h1>
-      <span class="hidden md:block">  Привет, {{ user?.name || 'Админ' }}!</span>
+
+      <div class="flex items-center gap-3">
+        <span class="hidden md:block">Привет, {{ user?.name || 'Админ' }}!</span>
+
+        <BaseButton
+            variant="danger"
+            @click="handleLogout"
+            class="!px-3 !py-1 !text-sm"
+        >
+          Выйти
+        </BaseButton>
+      </div>
     </header>
 
     <!-- Body -->
@@ -26,10 +37,11 @@
 
 <script>
 import Sidebar from '@/components/Sidebar.vue'
+import BaseButton from '@/components/BaseButton.vue'
 
 export default {
   name: 'AppLayout',
-  components: { Sidebar },
+  components: { Sidebar, BaseButton },
 
   computed: {
     user() {
@@ -41,18 +53,18 @@ export default {
     async getMe() {
       try {
         await this.$users.getMe()
-        console.log('Пользователь обновлён:', this.user)
-        if (this.user?.role === 'admin') {
-          console.log('✅ Это админ!')
-        }
       } catch (e) {
         console.warn('Ошибка при загрузке пользователя:', e)
       }
     },
 
-    updateUserName(newName) {
-      const updated = { ...this.user, name: newName }
-      this.$users.setUser(updated)
+    async handleLogout() {
+      try {
+        await this.$auth.logout()
+        this.$router.push({ name: 'Login' })
+      } catch (e) {
+        console.warn('Ошибка при выходе:', e)
+      }
     },
   },
 
@@ -62,4 +74,3 @@ export default {
   },
 }
 </script>
-

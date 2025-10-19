@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { AuthService } from '@/services/AuthService'
 import { useUserStore } from '@/stores/userStore.js'
 
-const TOKEN_KEY = 'auth_token_v1'
+const TOKEN_KEY = 'auth_token'
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -54,10 +54,6 @@ export const useAuthStore = defineStore('auth', {
 
                 this.setToken(token)
 
-                // обновляем данные пользователя
-                const userStore = useUserStore()
-                await userStore.getMe()
-
                 return res
             } catch (error) {
                 this.clearToken()
@@ -65,10 +61,16 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        logout() {
-            this.clearToken()
+        async logout() {
             const userStore = useUserStore()
-            userStore.clearUser()
+            try {
+                await AuthService.logout()
+            } catch (e) {
+                console.warn('Ошибка при logout на сервере:', e)
+            } finally {
+                this.clearToken()
+                userStore.clearUser()
+            }
         },
     },
 })

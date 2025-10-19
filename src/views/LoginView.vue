@@ -8,7 +8,7 @@
 
       <ErrorAlert v-if="error" :message="error" @close="error = ''" class="mb-4" />
 
-      <BaseButton :disabled="loading">
+      <BaseButton :disabled="loading" type="submit">
         {{ loading ? 'Входим...' : 'Войти' }}
       </BaseButton>
     </form>
