@@ -1,5 +1,5 @@
 export const SidebarItems = [
   { name: 'Dashboard', route: 'Dashboard' },
-  { name: 'Sports', route: 'SportIndex' },
+  { name: 'Sports', route: 'Sports.Index' },
 
 ]

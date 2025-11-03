@@ -8,6 +8,7 @@ import '@/style/main.css'
 import {useAuthStore} from "@/stores/authStore.js";
 import {useUserStore} from "@/stores/userStore.js";
 import {useSportStore} from "@/stores/sportStore.js";
+import {useTeamStore} from "@/stores/teamStore.js";
 
 const app = createApp(App)
 
@@ -18,6 +19,7 @@ app.use(router)
 app.config.globalProperties.$auth = useAuthStore()
 app.config.globalProperties.$users = useUserStore()
 app.config.globalProperties.$sport = useSportStore()
+app.config.globalProperties.$team = useTeamStore()
 
 
 app.mount('#app')

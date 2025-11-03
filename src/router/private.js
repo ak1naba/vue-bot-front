@@ -3,6 +3,9 @@ import DashboardView from '@/views/DashboardView.vue'
 import SportIndexView from '@/views/Sport/SportIndexView.vue'
 import SportEditView from '@/views/Sport/SportEditView.vue'
 import SportCreateView from "@/views/Sport/SportCreateView.vue";
+import TeamIndexView from "@/views/Team/TeamIndexView.vue";
+import TeamCreateView from "@/views/Team/TeamCreateView.vue";
+import TeamEditView from "@/views/Team/TeamEditView.vue";
 
 export default [
   {
@@ -13,6 +16,8 @@ export default [
       requiresAuth: true
     },
   },
+
+  // Sport
   {
     path: '/sports',
     name: 'Sports.Index',
@@ -37,5 +42,33 @@ export default [
       requiresAuth: true
     },
   },
+
+
+  // Team
+  {
+    path: '/teams',
+    name: 'Teams.Index',
+    component: TeamIndexView,
+    meta: {
+      requiresAuth: true
+    },
+  },
+  {
+    path: '/teams/create',
+    name: 'Teams.Create',
+    component: TeamCreateView,
+    meta: {
+      requiresAuth: true
+    },
+  },
+  {
+    path: '/teams/:id/edit',
+    name: 'Teams.Edit',
+    component: TeamEditView,
+    meta: {
+      requiresAuth: true
+    },
+  },
+
 ]
 
