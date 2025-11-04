@@ -6,6 +6,9 @@ import SportCreateView from "@/views/Sport/SportCreateView.vue";
 import TeamIndexView from "@/views/Team/TeamIndexView.vue";
 import TeamCreateView from "@/views/Team/TeamCreateView.vue";
 import TeamEditView from "@/views/Team/TeamEditView.vue";
+import EventIndexView from "@/views/Events/EventIndexView.vue";
+import EventCreateView from "@/views/Events/EventCreateView.vue";
+import EventEditView from "@/views/Events/EventEditView.vue";
 
 export default [
   {
@@ -69,6 +72,33 @@ export default [
       requiresAuth: true
     },
   },
+
+  // Events
+  {
+    path: '/events',
+    name: 'Events.Index',
+    component: EventIndexView,
+    meta: {
+      requiresAuth: true
+    },
+  },
+  {
+    path: '/events/create',
+    name: 'Events.Create',
+    component: EventCreateView,
+    meta: {
+      requiresAuth: true
+    },
+  },
+  {
+    path: '/events/:id/edit',
+    name: 'Events.Edit',
+    component: EventEditView,
+    meta: {
+      requiresAuth: true
+    },
+  },
+
 
 ]
 
