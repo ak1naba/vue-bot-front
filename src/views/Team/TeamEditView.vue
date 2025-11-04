@@ -1,23 +1,29 @@
 <template>
   <AppLayout>
     <div>
-      <h1 class="text-2xl font-bold mb-4">Редактирование вида спорта</h1>
+      <h1 class="text-2xl font-bold mb-4">Редактирование спортивной команды</h1>
 
       <ErrorAlert v-if="error" :message="error" />
 
-      <form @submit.prevent="updateSport" class="space-y-4 max-w-md">
+      <form @submit.prevent="updateTeam" class="space-y-4 max-w-md" v-if="!loading.team">
         <div>
           <label class="block mb-1 font-medium">Название</label>
-          <BaseInput v-model="name" type="text" placeholder="Введите название" />
+          <BaseInput v-model="team.name" type="text" placeholder="Введите название" />
+          <label class="block mb-1 mt-1 font-medium">Вид спорта</label>
+          <BaseSelector
+              v-model="team.sport_id"
+              :items="sports"
+              labelField="name"
+              valueField="id"
+              placeholder="Выберите спорт"
+          />
         </div>
 
         <div class="flex gap-2">
-          <BaseButton type="submit" :disabled="loading">
-            {{ loading ? 'Сохраняем...' : 'Сохранить' }}
+          <BaseButton type="submit" :disabled="loading.sports">
+            {{ loading.team ? 'Сохраняем...' : 'Сохранить' }}
           </BaseButton>
-          <router-link to="/sports">
-            <BaseButton type="button" variant="secondary">Отмена</BaseButton>
-          </router-link>
+          <BaseButton type="button" variant="secondary"   @click="this.$router.push({ name: 'Teams.Index'})">Отмена</BaseButton>
         </div>
       </form>
     </div>
@@ -29,10 +35,12 @@ import ErrorAlert from '@/components/ErrorAlert.vue'
 import AppLayout from "@/layouts/AppLayout.vue"
 import BaseButton from '@/components/BaseButton.vue'
 import BaseInput from '@/components/BaseInput.vue'
+import BaseSelector from "@/components/BaseSelector.vue";
 
 export default {
   name: 'SportEditView',
   components: {
+    BaseSelector,
     AppLayout,
     ErrorAlert,
     BaseButton,
@@ -40,52 +48,73 @@ export default {
   },
   data() {
     return {
-      name: '',
-      loading: false,
+      team: {
+        name: '',
+        sport_id: '',
+      },
+      loading: {
+        team: false,
+        sports: false,
+      },
       error: '',
     }
   },
   computed: {
-    sportId() {
+    teamId() {
       return this.$route.params.id
     }
   },
   methods: {
-    fetchSport() {
-      this.loading = true
+    fetchTeam() {
+      this.loading.team = true
       this.error = ''
-      this.$sport.fetchSport(this.sportId)
+      this.$team.fetchTeam(this.teamId)
           .then(res => {
-            this.name = res.data.name
+            this.team = res.data
           })
           .catch(err => {
             this.error = err?.response?.data?.message || 'Ошибка при загрузке вида спорта.'
           })
           .finally(() => {
-            this.loading = false
+            this.loading.team = false
           })
     },
-    updateSport() {
-      if (!this.name) {
-        this.error = 'Введите название'
-        return
-      }
-
-      this.loading = true
-      this.$sport.updateSport(this.sportId, {name: this.name})
+    updateTeam() {
+      this.loading.team = true
+      this.$team.updateTeam(this.teamId, this.team)
           .then(() => {
-            this.$router.push({name: 'Sports.Index'})
+            this.$router.push({name: 'Teams.Index'})
           })
           .catch(err => {
             this.error = err?.response?.data?.message || 'Ошибка при обновлении.'
           })
           .finally(() => {
-            this.loading = false
+            this.loading.team = false
+          })
+    },
+    fetchSports() {
+      this.loading.sports = true
+      this.error = ''
+
+      this.$sport.fetchSports({
+        page: this.page,
+        count_on_page: -1
+      })
+          .then(res => {
+            this.sports = res.data.data
+          })
+          .catch(err => {
+            this.error = err?.response?.data?.message || 'Ошибка при загрузке списка видов спорта.'
+          })
+          .finally(() => {
+            this.loading.sports = false
           })
     }
+
   },
   mounted() {
-    this.fetchSport()
+    this.fetchTeam()
+    this.fetchSports()
   }
 }
 </script>

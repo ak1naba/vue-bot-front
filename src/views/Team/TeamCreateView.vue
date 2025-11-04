@@ -1,17 +1,20 @@
 <template>
   <AppLayout>
     <div>
-      <h1 class="text-2xl font-bold mb-4">Добавление вида спорта</h1>
+      <h1 class="text-2xl font-bold mb-4">Добавление спортивной команды</h1>
 
       <ErrorAlert v-if="error" :message="error"/>
 
-      <form @submit.prevent="createSport" class="space-y-4 max-w-md">
+      <form @submit.prevent="createTeam" class="space-y-4 max-w-md">
         <div>
-          <label class="block mb-1 font-medium">Название</label>
+          <label class="block mb-1 mt-1  font-medium">Название</label>
           <BaseInput v-model="team.name" type="text" placeholder="Введите название спортивной команлы"/>
-          <ApiSelector
+          <label class="block mb-1 mt-1 font-medium">Вид спорта</label>
+          <BaseSelector
               v-model="team.sport_id"
-              endpoint="admin/sport"
+              :items="sports"
+              labelField="name"
+              valueField="id"
               placeholder="Выберите спорт"
           />
         </div>
@@ -24,7 +27,7 @@
           <BaseButton
               type="button"
               variant="secondary"
-              @click="this.$router.push({ name: 'Sports.Index'})">
+              @click="this.$router.push({ name: 'Teams.Index'})">
             Отмена
           </BaseButton>
 
@@ -39,12 +42,12 @@ import ErrorAlert from '@/components/ErrorAlert.vue'
 import AppLayout from "@/layouts/AppLayout.vue"
 import BaseButton from '@/components/BaseButton.vue'
 import BaseInput from '@/components/BaseInput.vue'
-import ApiSelector from "@/components/ApiSelector.vue";
+import BaseSelector from "@/components/BaseSelector.vue";
 
 export default {
   name: 'SportCreateView',
   components: {
-    ApiSelector,
+    BaseSelector,
     AppLayout,
     ErrorAlert,
     BaseButton,
@@ -56,25 +59,17 @@ export default {
         name: '',
         sport_id: '',
       },
+      sports: [],
       loading: false,
       error: '',
     }
   },
   methods: {
-    createSport() {
-      if (!this.name) {
-        this.error = 'Введите название'
-        return
-      }
-
+    createTeam() {
       this.loading = true
-      this.$sport.createSport(
-          {
-            name: this.name
-          }
-      )
+      this.$team.createTeam(this.team)
           .then(() => {
-            this.$router.push({name: 'Sports.Index'})
+            this.$router.push({name: 'Teams.Index'})
           })
           .catch(err => {
             this.error = err?.response?.data?.message
@@ -82,7 +77,29 @@ export default {
           .finally(() => {
             this.loading = false
           })
+    },
+
+    fetchSports() {
+      this.loading = true
+      this.error = ''
+
+      this.$sport.fetchSports({
+        page: this.page,
+        count_on_page: -1
+      })
+          .then(res => {
+            this.sports = res.data.data
+          })
+          .catch(err => {
+            this.error = err?.response?.data?.message || 'Ошибка при загрузке списка видов спорта.'
+          })
+          .finally(() => {
+            this.loading = false
+          })
     }
+  },
+  mounted() {
+    this.fetchSports()
   }
 }
 </script>

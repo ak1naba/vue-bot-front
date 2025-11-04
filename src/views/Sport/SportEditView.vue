@@ -15,9 +15,9 @@
           <BaseButton type="submit" :disabled="loading">
             {{ loading ? 'Сохраняем...' : 'Сохранить' }}
           </BaseButton>
-          <router-link to="/sports">
-            <BaseButton type="button" variant="secondary">Отмена</BaseButton>
-          </router-link>
+
+          <BaseButton type="button" variant="secondary"   @click="this.$router.push({ name: 'Sports.Index'})">>Отмена</BaseButton>
+
         </div>
       </form>
     </div>
