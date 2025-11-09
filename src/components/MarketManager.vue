@@ -59,17 +59,14 @@
           </div>
         </div>
 
-        <!-- Odds list and add form -->
-        <!-- <div class="mt-3">
+        
+          <div class="mt-3">
           <label class="block mb-1 font-medium">Добавить коэффициент</label>
           <div class="flex gap-2 mb-3">
             <BaseInput 
-              v-model="oddForms[m.id].label" 
-              placeholder="Название" 
-            />
-            <BaseInput 
-              v-model="oddForms[m.id].value" 
-              placeholder="Значение" 
+              :modelValue="oddForms[m.id]?.value || ''" 
+              @update:modelValue="updateOddFormValue(m.id, $event)"
+              placeholder="Значение коэффициента" 
               type="number" 
               step="0.01"
             />
@@ -106,7 +103,7 @@
               </li>
             </ul>
           </div>
-        </div> -->
+        </div>  
       </div>
     </div>
 
@@ -199,7 +196,13 @@ export default {
         this.markets = res.data
         
         // Загружаем коэффициенты для каждого маркета
-        for (const m of this.markets.data) {
+        const arr = Array.isArray(this.markets.data) ? this.markets.data : [];
+        for (const m of arr) {
+          if (!this.oddForms[m.id]) {
+            this.oddForms[m.id] = { value: '' }
+          }
+        }
+        for (const m of arr) {
           await this.loadOdds(m.id)
         }
       } catch (e) {
@@ -219,11 +222,16 @@ export default {
 
       this.loadingMarket = true
       try {
-        await this.$market.createMarket(this.eventId, { 
+        const res = await this.$market.createMarket(this.eventId, { 
           ...this.marketForm,
           participant_id: this.marketForm.participant_id || null
         })
         this.resetMarketForm()
+        // Инициализируем oddForms для нового маркета
+        const newMarket = res.data?.data ?? res.data
+        if (newMarket && newMarket.id) {
+          this.oddForms[newMarket.id] = { value: '' }
+        }
         await this.loadMarkets()
         this.$emit('update')
       } catch (e) {
@@ -253,12 +261,10 @@ export default {
       this.loadingOdd = true
       try {
         const res = await this.$odd.fetchOdds(marketId)
-        this.$set(this.oddsByMarket, marketId, res.data?.data ?? res.data ?? [])
+        this.oddsByMarket[marketId] = res.data?.data ?? res.data ?? []
         
         // Инициализируем форму для добавления коэффициентов
-        if (!this.oddForms[marketId]) {
-          this.$set(this.oddForms, marketId, { label: '', value: '' })
-        }
+        this.oddForms[marketId] = this.oddForms[marketId] || { value: '' }
       } catch (e) {
         this.error = 'Ошибка при загрузке коэффициентов'
         this.$emit('error', this.error)
@@ -269,20 +275,17 @@ export default {
 
     async handleAddOdd(marketId) {
       const form = this.oddForms[marketId]
-      if (!form || !form.label || !form.value) {
-        this.error = 'Заполните все поля коэффициента'
+      if (!form || !form.value) {
+        this.error = 'Введите значение коэффициента'
         this.$emit('error', this.error)
         return
       }
 
       this.loadingOdd = true
       try {
-        const store = useOddStore()
-        await store.createOdd(marketId, { 
-          label: form.label, 
+        await this.$odd.createOdd(marketId, { 
           value: parseFloat(form.value) 
         })
-        this.oddForms[marketId].label = ''
         this.oddForms[marketId].value = ''
         await this.loadOdds(marketId)
         this.$emit('update')
@@ -298,8 +301,7 @@ export default {
       if (!confirm('Удалить коэффициент?')) return
       this.loadingOdd = true
       try {
-        const store = useOddStore()
-        await store.deleteOdd(marketId, oddId)
+        await this.$odd.deleteOdd(marketId, oddId)
         await this.loadOdds(marketId)
         this.$emit('update')
       } catch (e) {
@@ -308,6 +310,20 @@ export default {
       } finally {
         this.loadingOdd = false
       }
+    },
+
+    updateOddFormLabel(marketId, value) {
+      if (!this.oddForms[marketId]) {
+        this.oddForms[marketId] = { value: '' }
+      }
+      this.oddForms[marketId].label = value
+    },
+
+    updateOddFormValue(marketId, value) {
+      if (!this.oddForms[marketId]) {
+        this.oddForms[marketId] = { value: '' }
+      }
+      this.oddForms[marketId].value = value
     },
 
     resetMarketForm() {
