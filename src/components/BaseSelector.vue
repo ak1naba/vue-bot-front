@@ -41,7 +41,7 @@
 
 <script>
 export default {
-  name: "ApiSelector",
+  name: "BaseSelector",
   props: {
     modelValue: [String, Number, Object],
     items: { type: Array, default: () => [] },

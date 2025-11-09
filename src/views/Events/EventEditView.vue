@@ -64,6 +64,7 @@
 
       <!-- Markets & Odds -->
       <MarketManager
+        v-if="!loading.event"
         :eventId="eventId"
         @error="handleError"
       />
