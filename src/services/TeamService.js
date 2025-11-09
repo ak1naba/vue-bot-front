@@ -6,6 +6,11 @@ export const TeamService = {
         return privateApiRequest.get('/admin/team', {  params: params })
     },
 
+     // Получить список команд с пагинацией
+    indexBySport(sportId, params = {}) {
+        return privateApiRequest.get(`/admin/team/filter/${sportId}`, {  params: params })
+    },
+
     // Получить конкретный команду по id
     show(id) {
         return privateApiRequest.get(`/admin/team/${id}`)

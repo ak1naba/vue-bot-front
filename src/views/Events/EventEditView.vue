@@ -53,6 +53,20 @@
           </BaseButton>
         </div>
       </form>
+
+      <!-- Participants -->
+      <ParticipantManager
+        v-if="!loading.event"
+        :eventId="eventId"
+        :sportId="event.sport_id"
+        @error="handleError"
+      />
+
+      <!-- Markets & Odds -->
+      <MarketManager
+        :eventId="eventId"
+        @error="handleError"
+      />
     </div>
   </AppLayout>
 </template>
@@ -64,6 +78,8 @@ import BaseButton from '@/components/BaseButton.vue'
 import BaseInput from '@/components/BaseInput.vue'
 import BaseSelector from "@/components/BaseSelector.vue"
 import BaseTextarea from "@/components/BaseTextarea.vue"
+import ParticipantManager from '@/components/ParticipantManager.vue'
+import MarketManager from '@/components/MarketManager.vue'
 
 export default {
   name: 'EventEditView',
@@ -73,7 +89,9 @@ export default {
     AppLayout,
     ErrorAlert,
     BaseButton,
-    BaseInput
+    BaseInput,
+    ParticipantManager,
+    MarketManager
   },
   data() {
     return {
@@ -91,9 +109,12 @@ export default {
         {value: 'finished', label: 'Завершено'},
       ],
       sports: [],
+      
       loading: {
         event: false,
         sports: false,
+        teams: false,
+         // Removed unnecessary loading states
       },
       error: '',
     }
@@ -118,6 +139,9 @@ export default {
             data.start_time = this.formatDateForInput(data.start_time)
             data.end_time = this.formatDateForInput(data.end_time)
             this.event = data
+            if (data.sport_id) {
+              this.fetchTeamsBySport()
+            }
           })
           .catch(err => {
             this.error = err?.response?.data?.message || 'Ошибка при загрузке события.'
@@ -153,7 +177,12 @@ export default {
           .finally(() => {
             this.loading.sports = false
           })
-    }
+    },
+
+    handleError(message) {
+      this.error = message
+    },
+
   },
 
   mounted() {

@@ -17,6 +17,16 @@ export const useTeamStore = defineStore('team', {
             })
         },
 
+        fetchTeamsBySport(sportId, params = {}) {
+            return new Promise((resolve, reject) => {
+                TeamService.indexBySport(sportId, params)
+                    .then(res => {
+                        resolve(res)
+                    })
+                    .catch(err => reject(err))
+            })
+        },
+
         fetchTeam(id) {
             return new Promise((resolve, reject) => {
                 TeamService.show(id)
