@@ -31,7 +31,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="p in participants" :key="p.id" class="border-t">
+          <tr v-for="p in participants.data" :key="p.id" class="border-t">
             <td class="py-2">{{ p.id }}</td>
             <td class="py-2">{{ p.team?.name ?? '-' }}</td>
             <td class="py-2">
@@ -46,6 +46,24 @@
         </tbody>
       </table>
     </div>
+
+     <div class="mt-4 flex justify-between items-center">
+        <BaseButton
+            @click="prevPage"
+            :disabled="!participants.prev_page_url"
+            variant="secondary"
+        >
+          Назад
+        </BaseButton>
+
+        <BaseButton
+            @click="nextPage"
+            :disabled="!participants.next_page_url"
+            variant="secondary"
+        >
+          Вперед
+        </BaseButton>
+      </div>
   </section>
 </template>
 
@@ -80,7 +98,9 @@ export default {
       participants: [],
       teams: [],
       loading: false,
-      error: ''
+      error: '',
+      page: 1,
+      perPage: 10,
     }
   },
   watch: {
@@ -100,8 +120,11 @@ export default {
     async loadParticipants() {
       this.loading = true
       try {
-        const res = await this.$participant.fetchParticipants(this.eventId)
-        this.participants = res.data?.data ?? res.data ?? []
+        const res = await this.$participant.fetchParticipants(this.eventId, {
+          page: this.page,
+          count_on_page: this.perPage
+        })
+        this.participants = res.data
       } catch (e) {
         this.error = 'Ошибка при загрузке участников'
         this.$emit('error', this.error)
@@ -154,6 +177,19 @@ export default {
     resetForm() {
       this.form.name = ''
       this.form.team_id = null
+    },
+    nextPage() {
+      if (this.participants.next_page_url) {
+        this.page++
+        this.loadParticipants()
+      }
+    },
+
+    prevPage() {
+      if (this.participants.prev_page_url) {
+        this.page--
+        this.loadParticipants()
+      }
     }
   },
   mounted() {
