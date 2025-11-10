@@ -1,5 +1,5 @@
 <template>
-  <section class="mt-8">
+  <section class="mt-8" :class="{ 'opacity-60 pointer-events-none': disabled }">
     <h2 class="text-xl font-semibold mb-3">Участники</h2>
 
     <div class="mb-4 max-w-md">
@@ -11,10 +11,11 @@
           labelField="name"
           valueField="id"
           placeholder="Команда"
+          :disabled="disabled"
         />
         <BaseButton 
           @click="handleAdd" 
-          :disabled="loading"
+          :disabled="loading || disabled"
         >
           Добавить
         </BaseButton>
@@ -38,6 +39,7 @@
               <BaseButton 
                 variant="danger" 
                 @click="handleRemove(p.id)"
+                :disabled="disabled"
               >
                 Удалить
               </BaseButton>
@@ -50,7 +52,7 @@
      <div class="mt-4 flex justify-between items-center">
         <BaseButton
             @click="prevPage"
-            :disabled="!participants.prev_page_url"
+            :disabled="!participants.prev_page_url || disabled"
             variant="secondary"
         >
           Назад
@@ -58,7 +60,7 @@
 
         <BaseButton
             @click="nextPage"
-            :disabled="!participants.next_page_url"
+            :disabled="!participants.next_page_url || disabled"
             variant="secondary"
         >
           Вперед
@@ -88,6 +90,11 @@ export default {
     sportId: {
       type: [String, Number],
       default: null
+    }
+    ,
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -133,6 +140,7 @@ export default {
       }
     },
     async handleAdd() {
+      if (this.disabled) return
       this.loading = true
       try {
         await this.$participant.createParticipant(this.eventId, { ...this.form })
@@ -147,6 +155,7 @@ export default {
       }
     },
     async handleRemove(participantId) {
+      if (this.disabled) return
       if (!confirm('Удалить участника?')) return
       this.loading = true
       try {

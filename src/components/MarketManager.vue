@@ -1,5 +1,5 @@
 <template>
-  <section class="mt-8">
+  <section class="mt-8" :class="{ 'opacity-60 pointer-events-none': disabled }">
     <h2 class="text-xl font-semibold mb-3">Варианты исходов и коэффициенты</h2>
 
     <div class="mb-4 max-w-md">
@@ -12,6 +12,7 @@
             labelField="name"
             valueField="value"
             placeholder="Тип исхода"
+            :disabled="disabled"
           />
           <BaseSelector
             v-if="participantOptions.length"
@@ -20,15 +21,17 @@
             labelField="name"
             valueField="id"
             placeholder="Участник (опционально)"
+            :disabled="disabled"
           />
         </div>
         <BaseInput 
           v-model="marketForm.description" 
           placeholder="Описание исхода" 
+          :disabled="disabled"
         />
         <BaseButton 
           @click="handleAddMarket" 
-          :disabled="loadingMarket"
+          :disabled="loadingMarket || disabled"
           class="self-start"
         >
           Добавить исход
@@ -36,8 +39,8 @@
       </div>
     </div>
 
-    <div class="space-y-4">
-      <div v-for="m in markets.data" :key="m.id" class="p-4 border rounded" :class="{ 'opacity-60 pointer-events-none': m.is_win !== null && m.is_win !== undefined }">
+  <div class="space-y-4">
+  <div v-for="m in markets.data" :key="m.id" class="p-4 border rounded" :class="{ 'opacity-60 pointer-events-none': (m.is_win !== null && m.is_win !== undefined) || disabled }">
         <div class="flex justify-between items-start">
           <div class="flex-1">
             <h3 class="font-semibold">
@@ -61,6 +64,7 @@
                 labelField="label"
                 valueField="value"
                 placeholder="Выбрать результат"
+                :disabled="disabled"
               />
             </div>
           </div>
@@ -76,7 +80,7 @@
         </div>
 
         
-          <div class="mt-3">
+            <div class="mt-3">
           <label class="block mb-1 font-medium">Добавить коэффициент</label>
           <div class="flex gap-2 mb-3">
             <BaseInput 
@@ -85,10 +89,11 @@
               placeholder="Значение коэффициента" 
               type="number" 
               step="0.01"
+              :disabled="disabled || m.is_win !== null && m.is_win !== undefined"
             />
             <BaseButton 
               @click="handleAddOdd(m.id)" 
-              :disabled="loadingOdd"
+              :disabled="loadingOdd || disabled || (m.is_win !== null && m.is_win !== undefined)"
             >
               Добавить
             </BaseButton>
@@ -112,6 +117,7 @@
                   <BaseButton 
                     variant="danger" 
                     @click="handleDeleteOdd(m.id, odd.id)"
+                    :disabled="disabled || (m.is_win !== null && m.is_win !== undefined)"
                   >
                     Удалить
                   </BaseButton>
@@ -162,6 +168,11 @@ export default {
     eventId: {
       type: [String, Number],
       required: true
+    }
+    ,
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -235,6 +246,7 @@ export default {
     },
 
     async handleAddMarket() {
+      if (this.disabled) return
       if (!this.marketForm.type || !this.marketForm.description) {
         this.error = 'Заполните тип и описание исхода'
         this.$emit('error', this.error)
@@ -264,6 +276,7 @@ export default {
     },
 
     async handleDeleteMarket(marketId) {
+      if (this.disabled) return
       if (!confirm('Удалить исход?')) return
       this.loadingMarket = true
       try {
@@ -279,6 +292,7 @@ export default {
     },
 
     async handleUpdateMarketWin(marketId, isWin) {
+      if (this.disabled) return
       if (isWin === null || isWin === undefined) return
       
       this.loadingMarket = true
@@ -316,6 +330,7 @@ export default {
     },
 
     async handleAddOdd(marketId) {
+      if (this.disabled) return
       const form = this.oddForms[marketId]
       if (!form || !form.value) {
         this.error = 'Введите значение коэффициента'
@@ -340,6 +355,7 @@ export default {
     },
 
     async handleDeleteOdd(marketId, oddId) {
+      if (this.disabled) return
       if (!confirm('Удалить коэффициент?')) return
       this.loadingOdd = true
       try {

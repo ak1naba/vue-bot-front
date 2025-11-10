@@ -59,6 +59,7 @@
         v-if="!loading.event"
         :eventId="eventId"
         :sportId="event.sport_id"
+        :disabled="event.status === 'finished'"
         @error="handleError"
       />
 
@@ -66,6 +67,7 @@
       <MarketManager
         v-if="!loading.event"
         :eventId="eventId"
+        :disabled="event.status === 'finished'"
         @error="handleError"
       />
     </div>
