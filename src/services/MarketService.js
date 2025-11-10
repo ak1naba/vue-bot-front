@@ -29,4 +29,8 @@ export const MarketService = {
     restore(eventId, marketId) {
         return privateApiRequest.post(`/admin/event/${eventId}/market/restore/${marketId}`)
     },
+
+    settle(eventId, marketId, data) {
+        return privateApiRequest.post(`/admin/event/${eventId}/market/${marketId}/settle`, data)
+    },
 }

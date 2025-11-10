@@ -62,5 +62,13 @@ export const useMarketStore = defineStore('market', {
                     .catch(err => reject(err))
             })
         },
+
+        settleMarket(eventId, marketId, data) {
+            return new Promise((resolve, reject) => {
+                MarketService.settle(eventId, marketId, data)
+                    .then(res => resolve(res))
+                    .catch(err => reject(err))
+            })
+        },
     },
 })

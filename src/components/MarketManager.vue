@@ -37,22 +37,38 @@
     </div>
 
     <div class="space-y-4">
-      <div v-for="m in markets.data" :key="m.id" class="p-4 border rounded">
+      <div v-for="m in markets.data" :key="m.id" class="p-4 border rounded" :class="{ 'opacity-60 pointer-events-none': m.is_win !== null && m.is_win !== undefined }">
         <div class="flex justify-between items-start">
-          <div>
+          <div class="flex-1">
             <h3 class="font-semibold">
               {{ m.type }} 
               <span class="text-sm text-gray-500">(id: {{ m.id }})</span>
+              <span v-if="m.is_win !== null && m.is_win !== undefined" class="ml-2 text-sm font-medium" :class="m.is_win ? 'text-green-600' : 'text-red-600'">
+                {{ m.is_win ? '✓ Победа' : '✗ Проигрыш' }}
+              </span>
             </h3>
             <div class="text-sm text-gray-600">{{ m.description }}</div>
             <div v-if="m.participant" class="text-sm text-gray-500">
               Участник: {{ m.participant.team?.name ?? '-' }}
+            </div>
+            
+            <div v-if="m.is_win === null || m.is_win === undefined" class="mt-2 flex items-center gap-2">
+              <label class="text-sm font-medium">Результат:</label>
+              <BaseSelector
+                :modelValue="marketWinStatus[m.id]"
+                @update:modelValue="handleUpdateMarketWin(m.id, $event)"
+                :items="winOptions"
+                labelField="label"
+                valueField="value"
+                placeholder="Выбрать результат"
+              />
             </div>
           </div>
           <div class="flex gap-2">
             <BaseButton 
               variant="danger" 
               @click="handleDeleteMarket(m.id)"
+              :disabled="m.is_win !== null && m.is_win !== undefined"
             >
               Удалить
             </BaseButton>
@@ -160,11 +176,16 @@ export default {
       participants: [],
       participantOptions: [],
       oddsByMarket: {},
+      marketWinStatus: {},
       loadingMarket: false,
       loadingOdd: false,
       error: '',
       page: 1,
       perPage: 10,
+      winOptions: [
+        { value: true, label: 'Победа' },
+        { value: false, label: 'Проигрыш' }
+      ],
       marketTypes: [
         { value: 'win', name: 'Победа' },
         { value: 'draw', name: 'Ничья' },
@@ -251,6 +272,27 @@ export default {
         this.$emit('update')
       } catch (e) {
         this.error = 'Ошибка при удалении исхода'
+        this.$emit('error', this.error)
+      } finally {
+        this.loadingMarket = false
+      }
+    },
+
+    async handleUpdateMarketWin(marketId, isWin) {
+      if (isWin === null || isWin === undefined) return
+      
+      this.loadingMarket = true
+
+      const data = {
+        is_win: isWin
+      }
+
+      try {
+        await this.$market.settleMarket(this.eventId, marketId, data)
+        await this.loadMarkets()
+        this.$emit('update')
+      } catch (e) {
+        this.error = 'Ошибка при обновлении результата'
         this.$emit('error', this.error)
       } finally {
         this.loadingMarket = false
